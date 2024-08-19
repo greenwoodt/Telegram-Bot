@@ -5,7 +5,7 @@ Rails.application.config.after_initialize do
 
   Telegram::Bot::Client.run(token) do |bot|
     Rails.application.config.telegram_bot = bot
-
+    bot.api.get_updates(offset: -1)
     bot.listen do |message|
       case message.text
       when '/start'
