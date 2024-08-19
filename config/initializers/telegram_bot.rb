@@ -1,19 +1,24 @@
 require 'telegram/bot'
 
 Rails.application.config.after_initialize do
+  puts "Running Telegram Bot Job!!"
+  TelegramBotWorkerJob.perform_async(Rails.application.credentials.dig(:telegram_bot))
+end
+
+Rails.application.config.after_initialize do
   token = Rails.application.credentials.dig(:telegram_bot)
 
   Telegram::Bot::Client.run(token) do |bot|
     Rails.application.config.telegram_bot = bot
     bot.api.get_updates(offset: -1)
-    bot.listen do |message|
-      case message.text
-      when '/start'
-        bot.api.send_message(chat_id: message.chat.id, text: "Hello, #{message.from.first_name} | Chat ID: #{message.chat.id}")
-      when '/stop'
-        bot.api.send_message(chat_id: message.chat.id, text: "Bye, #{message.from.first_name} | Chat ID: #{message.chat.id}")
-      end
-    end
+    # bot.listen do |message|
+    #   case message.text
+    #   when '/start'
+    #     bot.api.send_message(chat_id: message.chat.id, text: "Hello, #{message.from.first_name} | Chat ID: #{message.chat.id}")
+    #   when '/stop'
+    #     bot.api.send_message(chat_id: message.chat.id, text: "Bye, #{message.from.first_name} | Chat ID: #{message.chat.id}")
+    #   end
+    # end
   end
   rescue Telegram::Bot::Exceptions::ResponseError => e
     Rails.logger.error e
